@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Translator Bot Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    .metrics { display: flex; gap: 2rem; }
+    canvas { max-width: 600px; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>Real-Time Translator Bot Dashboard</h1>
+
+  <div class="metrics">
+    <div><strong>Throughput:</strong> <span id="throughput"><%= data.throughput %></span></div>
+    <div><strong>Translations:</strong> <span id="transCount"><%= data.transCount %></span></div>
+    <div><strong>Cache Hits:</strong> <span id="cacheHits"><%= data.cacheHits %></span></div>
+    <div><strong>Cache Misses:</strong> <span id="cacheMisses"><%= data.cacheMisses %></span></div>
+  </div>
+
+  <h2>Detected Languages</h2>
+  <ul id="langCounts">
+    <% for(const [lang,count] of Object.entries(data.langCounts)) { %>
+      <li><%= lang %>: <%= count %></li>
+    <% } %>
+  </ul>
+
+  <h2>Events Over Last Hour</h2>
+  <canvas id="detectChart"></canvas>
+  <canvas id="transChart"></canvas>
+
+  <script>
+    // init charts
+    function makeChart(ctx, label, color) {
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [], datasets: [{
+            label, data: [], borderColor: color, fill: false
+          }]
+        }
+      });
+    }
+
+    const detectChart = makeChart(
+      document.getElementById('detectChart').getContext('2d'),
+      'Detections/min','blue'
+    );
+    const transChart = makeChart(
+      document.getElementById('transChart').getContext('2d'),
+      'Translations/min','green'
+    );
+
+    // Helper to update charts
+    function updateChart(chart, series) {
+      const labels = Object.keys(series).sort();
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = labels.map(k => series[k]);
+      chart.update();
+    }
+
+    // Socket.IO live updates
+    const socket = io();
+    socket.on('metricsUpdate', data => {
+      // numeric metrics
+      document.getElementById('throughput').textContent  = data.throughput;
+      document.getElementById('transCount').textContent  = data.transCount;
+      document.getElementById('cacheHits').textContent   = data.cacheHits;
+      document.getElementById('cacheMisses').textContent = data.cacheMisses;
+
+      // languages list
+      const ul = document.getElementById('langCounts');
+      ul.innerHTML = '';
+      Object.entries(data.langCounts).forEach(([lang, cnt]) => {
+        const li = document.createElement('li');
+        li.textContent = `${lang}: ${cnt}`;
+        ul.appendChild(li);
+      });
+
+      // charts
+      updateChart(detectChart, data.detectSeries);
+      updateChart(transChart, data.transSeries);
+    });
+  </script>
+</body>
+</html>
