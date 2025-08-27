@@ -5,7 +5,10 @@ const path = require('path');
 const voiceTranslate = require('./voiceTranslate');
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates
   ]
 });
 
@@ -30,14 +33,19 @@ for (const file of eventFiles) {
 
 // handle slash interactions
 client.on('interactionCreate', async interaction => {
-  if (!interaction.isCommand()) return;
+  if (!interaction.isCommand() && !interaction.isContextMenuCommand()) return;
   const cmd = client.commands.get(interaction.commandName);
   if (!cmd) return;
   try {
     await cmd.execute(interaction, client);
   } catch (error) {
     console.error('Command error:', error);
-    await interaction.reply({ content: 'There was an error executing that command.', ephemeral: true });
+    const reply = { content: 'There was an error executing that command.', ephemeral: true };
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply(reply);
+    } else {
+      await interaction.reply(reply);
+    }
   }
 });
 
