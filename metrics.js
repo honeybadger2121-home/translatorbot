@@ -4,6 +4,7 @@ const events = new Map();
 
 let redis;
 let useRedis = false;
+let loggedMetricsStatus = false;
 
 try {
   const Redis = require('ioredis');
@@ -11,15 +12,20 @@ try {
   
   redis.on('connect', () => {
     useRedis = true;
-    console.log('Metrics connected to Redis');
+    console.log('✅ Metrics connected to Redis');
+    loggedMetricsStatus = true;
   });
   
   redis.on('error', () => {
     useRedis = false;
-    console.log('Metrics using in-memory storage');
+    if (!loggedMetricsStatus) {
+      console.log('⚠️  Metrics using in-memory storage');
+      loggedMetricsStatus = true;
+    }
   });
 } catch (err) {
-  console.log('Metrics using in-memory storage');
+  console.log('⚠️  Metrics using in-memory storage');
+  loggedMetricsStatus = true;
 }
 
 // Increment a simple counter
@@ -28,7 +34,13 @@ async function incr(key) {
     try {
       return await redis.incr(key);
     } catch (err) {
-      useRedis = false;
+      if (useRedis) {
+        useRedis = false;
+        if (!loggedMetricsStatus) {
+          console.log('⚠️  Metrics Redis connection lost, using in-memory storage');
+          loggedMetricsStatus = true;
+        }
+      }
     }
   }
   metrics.set(key, (metrics.get(key) || 0) + 1);
@@ -40,7 +52,13 @@ async function hincr(hash, field) {
     try {
       return await redis.hincrby(hash, field, 1);
     } catch (err) {
-      useRedis = false;
+      if (useRedis) {
+        useRedis = false;
+        if (!loggedMetricsStatus) {
+          console.log('⚠️  Metrics Redis connection lost, using in-memory storage');
+          loggedMetricsStatus = true;
+        }
+      }
     }
   }
   const hashMap = metrics.get(hash) || new Map();
@@ -55,7 +73,13 @@ async function recordEvent(setKey) {
       const ts = Date.now();
       return await redis.zadd(setKey, ts, ts);
     } catch (err) {
-      useRedis = false;
+      if (useRedis) {
+        useRedis = false;
+        if (!loggedMetricsStatus) {
+          console.log('⚠️  Metrics Redis connection lost, using in-memory storage');
+          loggedMetricsStatus = true;
+        }
+      }
     }
   }
   const eventList = events.get(setKey) || [];

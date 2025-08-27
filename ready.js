@@ -8,7 +8,7 @@ module.exports = {
     console.log(`Logged in as ${client.user.tag}`);
 
     const commands = [];
-    const commandFiles = ['setLang.js', 'getLang.js', 'startVoice.js', 'stopVoice.js', 'translateMessage.js'];
+    const commandFiles = ['setLang.js', 'getLang.js', 'startVoice.js', 'stopVoice.js', 'translateMessage.js', 'autoTranslate.js'];
     
     console.log('Loading commands...');
     for (const file of commandFiles) {

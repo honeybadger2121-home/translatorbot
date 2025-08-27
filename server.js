@@ -7,6 +7,7 @@ const { Server } = require('socket.io');
 
 let redis;
 let useRedis = false;
+let loggedDashboardStatus = false;
 
 try {
   const Redis = require('ioredis');
@@ -14,15 +15,20 @@ try {
   
   redis.on('connect', () => {
     useRedis = true;
-    console.log('Dashboard connected to Redis');
+    console.log('✅ Dashboard connected to Redis');
+    loggedDashboardStatus = true;
   });
   
   redis.on('error', () => {
     useRedis = false;
-    console.log('Dashboard using fallback data');
+    if (!loggedDashboardStatus) {
+      console.log('⚠️  Dashboard using fallback data (Redis unavailable)');
+      loggedDashboardStatus = true;
+    }
   });
 } catch (err) {
-  console.log('Dashboard using fallback data');
+  console.log('⚠️  Dashboard using fallback data (Redis not configured)');
+  loggedDashboardStatus = true;
 }
 
 const app = express();

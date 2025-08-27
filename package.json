@@ -1,7 +1,7 @@
 {
   "name": "translator-bot",
-  "version": "1.0.0",
-  "description": "A Discord bot for real-time translation with voice support and analytics dashboard",
+  "version": "2.0.0",
+  "description": "A Discord bot for real-time translation with voice support, auto-translation, and analytics dashboard",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {

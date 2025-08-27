@@ -6,6 +6,10 @@ module.exports = {
     return users.get(userId) || null;
   },
   setUserLang: (userId, lang) => {
-    users.set(userId, lang);
+    if (lang === null || lang === undefined) {
+      users.delete(userId);
+    } else {
+      users.set(userId, lang);
+    }
   }
 };

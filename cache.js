@@ -3,6 +3,7 @@ const cache = new Map();
 
 let redis;
 let useRedis = false;
+let loggedRedisStatus = false;
 
 try {
   const Redis = require('ioredis');
@@ -10,15 +11,20 @@ try {
   
   redis.on('connect', () => {
     useRedis = true;
-    console.log('Connected to Redis');
+    console.log('✅ Connected to Redis for caching');
+    loggedRedisStatus = true;
   });
   
   redis.on('error', () => {
     useRedis = false;
-    console.log('Redis unavailable, using in-memory cache');
+    if (!loggedRedisStatus) {
+      console.log('⚠️  Redis unavailable, using in-memory cache');
+      loggedRedisStatus = true;
+    }
   });
 } catch (err) {
-  console.log('Redis not configured, using in-memory cache');
+  console.log('⚠️  Redis not configured, using in-memory cache');
+  loggedRedisStatus = true;
 }
 
 module.exports = {
@@ -27,7 +33,13 @@ module.exports = {
       try {
         return await redis.get(key);
       } catch (err) {
-        useRedis = false;
+        if (useRedis) {
+          useRedis = false;
+          if (!loggedRedisStatus) {
+            console.log('⚠️  Redis connection lost, switching to in-memory cache');
+            loggedRedisStatus = true;
+          }
+        }
       }
     }
     return cache.get(key) || null;
@@ -37,7 +49,13 @@ module.exports = {
       try {
         return await redis.set(key, value, 'EX', ttlSeconds);
       } catch (err) {
-        useRedis = false;
+        if (useRedis) {
+          useRedis = false;
+          if (!loggedRedisStatus) {
+            console.log('⚠️  Redis connection lost, switching to in-memory cache');
+            loggedRedisStatus = true;
+          }
+        }
       }
     }
     cache.set(key, value);

@@ -14,7 +14,7 @@ const client = new Client({
 
 // load slash commands
 client.commands = new Collection();
-const commandFiles = ['setLang.js', 'getLang.js', 'startVoice.js', 'stopVoice.js', 'translateMessage.js'];
+const commandFiles = ['setLang.js', 'getLang.js', 'startVoice.js', 'stopVoice.js', 'translateMessage.js', 'autoTranslate.js'];
 for (const file of commandFiles) {
   const command = require(`./${file}`);
   client.commands.set(command.data.name, command);
@@ -65,7 +65,7 @@ const commands = [];
 [
   'setLang.js', 'getLang.js',
   'startVoice.js', 'stopVoice.js',
-  'translateMessage.js'
+  'translateMessage.js', 'autoTranslate.js'
 ].forEach(file => {
   const cmd = require(`./${file}`);
   client.commands.set(cmd.data.name, cmd);
