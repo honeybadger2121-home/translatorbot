@@ -5,31 +5,50 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <style>
-    body { font-family: sans-serif; margin: 2rem; }
-    .metrics { display: flex; gap: 2rem; }
+    body { font-family: sans-serif; margin: 2rem; background: #f5f5f5; }
+    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .metrics { display: flex; gap: 2rem; flex-wrap: wrap; }
+    .metric-card { background: #fff; border: 1px solid #ddd; padding: 1rem; border-radius: 6px; min-width: 150px; }
     canvas { max-width: 600px; margin-top: 2rem; }
+    .footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee; font-size: 0.9em; color: #666; }
+    .footer a { color: #007bff; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <h1>Real-Time Translator Bot Dashboard</h1>
+  <div class="container">
+    <h1>🌐 Translator Bot Dashboard</h1>
+    <p>Real-time analytics and monitoring for Discord translation services</p>
 
-  <div class="metrics">
-    <div><strong>Throughput:</strong> <span id="throughput"><%= data.throughput %></span></div>
-    <div><strong>Translations:</strong> <span id="transCount"><%= data.transCount %></span></div>
-    <div><strong>Cache Hits:</strong> <span id="cacheHits"><%= data.cacheHits %></span></div>
-    <div><strong>Cache Misses:</strong> <span id="cacheMisses"><%= data.cacheMisses %></span></div>
+    <div class="metrics">
+      <div class="metric-card"><strong>Throughput:</strong> <span id="throughput"><%= metrics.throughput %></span></div>
+      <div class="metric-card"><strong>Translations:</strong> <span id="transCount"><%= metrics.transCount %></span></div>
+      <div class="metric-card"><strong>Cache Hits:</strong> <span id="cacheHits"><%= metrics.cacheHits %></span></div>
+      <div class="metric-card"><strong>Cache Misses:</strong> <span id="cacheMisses"><%= metrics.cacheMisses %></span></div>
+    </div>
+
+    <h2>📊 Detected Languages</h2>
+    <ul id="langCounts">
+      <% for(const [lang,count] of Object.entries(metrics.langCounts)) { %>
+        <li><%= lang %>: <%= count %></li>
+      <% } %>
+    </ul>
+
+    <h2>📈 Events Over Last Hour</h2>
+    <canvas id="detectChart"></canvas>
+    <canvas id="transChart"></canvas>
+
+    <div class="footer">
+      <p><strong>Translator Bot</strong> - Discord Translation Service</p>
+      <p>
+        <a href="https://github.com/honeybadger2121-home/translatorbot" target="_blank">GitHub Repository</a> |
+        <a href="https://github.com/honeybadger2121-home/translatorbot/blob/main/TERMS.md" target="_blank">Terms of Service</a> |
+        <a href="https://github.com/honeybadger2121-home/translatorbot/blob/main/PRIVACY.md" target="_blank">Privacy Policy</a> |
+        <a href="https://github.com/honeybadger2121-home/translatorbot/issues" target="_blank">Support</a>
+      </p>
+      <p><small>© 2025 - Licensed under MIT License | Contact: BRS8519@gmail.com</small></p>
+    </div>
   </div>
-
-  <h2>Detected Languages</h2>
-  <ul id="langCounts">
-    <% for(const [lang,count] of Object.entries(data.langCounts)) { %>
-      <li><%= lang %>: <%= count %></li>
-    <% } %>
-  </ul>
-
-  <h2>Events Over Last Hour</h2>
-  <canvas id="detectChart"></canvas>
-  <canvas id="transChart"></canvas>
 
   <script>
     // init charts

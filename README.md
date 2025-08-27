@@ -81,6 +81,24 @@ Your bot needs these permissions:
 - Speak in Voice Channels
 - Use Voice Activity
 
+## Legal
+
+- [Terms of Service](TERMS.md)
+- [Privacy Policy](PRIVACY.md)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## Support
+
+- [Report Issues](https://github.com/honeybadger2121-home/translatorbot/issues)
+- [Request Features](https://github.com/honeybadger2121-home/translatorbot/issues)
+- Email: BRS8519@gmail.com
+
 ## License
 
-MIT License
+MIT License - see [LICENSE](LICENSE) file for details.
