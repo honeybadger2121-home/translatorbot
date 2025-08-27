@@ -33,18 +33,29 @@ for (const file of eventFiles) {
 
 // handle slash interactions
 client.on('interactionCreate', async interaction => {
+  console.log(`Received interaction: ${interaction.type} - ${interaction.commandName || 'unknown'}`);
+  
   if (!interaction.isCommand() && !interaction.isContextMenuCommand()) return;
   const cmd = client.commands.get(interaction.commandName);
-  if (!cmd) return;
+  if (!cmd) {
+    console.log(`Command not found: ${interaction.commandName}`);
+    return;
+  }
+  
   try {
+    console.log(`Executing command: ${interaction.commandName}`);
     await cmd.execute(interaction, client);
   } catch (error) {
     console.error('Command error:', error);
     const reply = { content: 'There was an error executing that command.', ephemeral: true };
-    if (interaction.deferred || interaction.replied) {
-      await interaction.editReply(reply);
-    } else {
-      await interaction.reply(reply);
+    try {
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply(reply);
+      } else {
+        await interaction.reply(reply);
+      }
+    } catch (replyError) {
+      console.error('Error sending error reply:', replyError);
     }
   }
 });
